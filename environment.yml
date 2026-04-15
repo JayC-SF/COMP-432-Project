@@ -1,6 +1,16 @@
 name: comp432project
 channels:
   - defaults
+  - conda-forge
 dependencies:
   - python=3.10
   - pytorch
+  - scikit-learn
+  - matplotlib
+  - numpy
+  - librosa
+  - grad-cam
+  - ipykernel
+  - gdown
+  - python-dotenv
+  - tqdm
