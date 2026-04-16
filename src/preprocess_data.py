@@ -25,6 +25,10 @@ def convert_audio_dataset_to_mel(audio_root, mel_root, sr=16000, n_mels=128, hop
     audio_root = Path(audio_root)
     mel_root = Path(mel_root)
 
+    if mel_root.exists():
+        print(f"{mel_root} already exists, skipping convertion...")
+        return
+
     # Find all audio files (wav, mp3, etc.)
     extensions = ['.wav', '.mp3', '.flac']
     audio_files = [f for f in audio_root.rglob('*') if f.suffix.lower() in extensions]
