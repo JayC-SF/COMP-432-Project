@@ -37,7 +37,7 @@ class ClassicCNN(nn.Module):
         # flatten for the dense layers
         x = x.view(x.size(0), -1)
 
-        x = f.relu(self.fc1(x))
+        x = F.relu(self.fc1(x))
         x = self.dropout(x)
         x = self.fc2(x)
 

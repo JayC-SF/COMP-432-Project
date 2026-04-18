@@ -3,6 +3,7 @@ from pathlib import Path
 from src.train.history import TrainingHistory
 import torch
 import copy
+from tqdm.auto import tqdm
 
 
 class TrainOrchestrator:
@@ -30,6 +31,7 @@ class TrainOrchestrator:
         self.max_epochs = max_epochs
 
     def train(self):
+        print(f"Running with device:{self.device}")
         self.th.model = self.th.model.to(self.device)
         continue_training = True
         while continue_training:
@@ -66,7 +68,9 @@ class TrainOrchestrator:
         running_loss = 0
         running_corrects = 0
 
-        for inputs, labels in self.train_loader:
+        pbar = tqdm(self.train_loader, desc=f"Epoch {self.th.epoch} [Train]", unit="batch", leave=False)
+
+        for inputs, labels in pbar:
             inputs = inputs.to(self.device)
             labels = labels.to(self.device)
 
@@ -87,7 +91,7 @@ class TrainOrchestrator:
         self.th.train_loss.append(epoch_loss)
         self.th.train_acc.append(epoch_acc)
 
-        print(f"Train Loss: {epoch_loss:.4f} Acc: {epoch_acc:.4f}")
+        print(f"Train Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.4f}")
 
     def validate_step(self):
         # 1. Set model to evaluation mode
@@ -98,7 +102,8 @@ class TrainOrchestrator:
 
         # 2. Turn off the gradient engine (saves memory/time)
         with torch.no_grad():
-            for inputs, labels in self.val_loader:
+            pbar = tqdm(self.train_loader, desc=f"Epoch {self.th.epoch} [Validate]", unit="batch", leave=False)
+            for inputs, labels in pbar:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
 

@@ -35,11 +35,17 @@ class TrainingHistory:
         torch.save(save_data, self.save_path / 'latest_history.pt')
 
     def save_best(self):
-        """Saves ONLY the best weights. Call this only when val_loss improves."""
+        """Saves only the best weights. Call this only when val_loss improves."""
         if self.best_model_weights is not None:
             torch.save(self.best_model_weights, self.save_path / 'best_model.pt')
 
     def recover(self):
+        """Recovers the state saved on disk.
+
+        Raises:
+            TypeError: If a scheduler was found on disk but not in the instance
+            TypeError: If a scheduler was not found on disk but found in the instance
+        """
         print("🚀 Recovering state from disk...")
         checkpoint = torch.load(self.save_path / 'latest_history.pt')
 
