@@ -24,7 +24,7 @@ class Orchestrator:
     ):
 
         self.save_path = save_path
-        self.th = TrainingHistory(self.save_path, model, optimizer, scheduler, recover=self.save_path.exists())
+        self.th = TrainingHistory(self.save_path, model, optimizer, device, scheduler, recover=self.save_path.exists())
         self.criterion = criterion
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -162,7 +162,7 @@ class Orchestrator:
         all_labels = []
         # 2. Turn off the gradient engine (saves memory/time)
         with torch.no_grad():
-            pbar = tqdm(test_loader, desc=f"Epoch {self.th.epoch} [Validate]", unit="batch", leave=False)
+            pbar = tqdm(test_loader, desc=f"Epoch {self.th.epoch} [Test]", unit="batch", leave=False)
             for inputs, labels in pbar:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
