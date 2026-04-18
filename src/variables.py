@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 try:
-    import google.colab
+    from google.colab import userdata
     IN_COLAB = True
 except ImportError:
     IN_COLAB = False
@@ -35,3 +35,5 @@ MEL_SPECTOGRAM_ZIP_FILE_PATH = DATA_PATH/'mel_spectogram.zip'
 MEL_SPECTOGRAM_NPZ_FILE_PATH = DATA_PATH/'mel_spectogram_audio_length_adjusted.npz'
 
 RUNS_PATH = Path('runs')
+
+SEED = 42
