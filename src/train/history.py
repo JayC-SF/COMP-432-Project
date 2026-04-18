@@ -1,0 +1,56 @@
+import torch
+
+
+class TrainingHistory:
+    def __init__(self, save_path, model, optimizer, recover=False):
+        self.save_path = save_path
+        self.model = model
+        self.optimizer = optimizer
+
+        if recover:
+            self.recover()
+        else:
+            self.train_loss = []
+            self.val_loss = []
+            self.train_acc = []
+            self.val_acc = []
+            self.best_val_loss = float('inf')
+            self.early_stopping_counter = 0
+            self.epoch = 0
+            self.best_model_weights = None
+
+    def save_checkpoint(self):
+        """Saves everything needed to resume training if the system crashes."""
+        # Exclude the heavy model/optimizer objects and the static 'best' weights
+        exclude = ['model', 'optimizer', 'best_model_weights']
+        save_data = {k: v for k, v in vars(self).items() if k not in exclude}
+
+        # Inject the live states
+        save_data['model_state'] = self.model.state_dict()
+        save_data['optimizer_state'] = self.optimizer.state_dict()
+
+        torch.save(save_data, self.save_path / 'latest_history.pt')
+
+    def save_best(self):
+        """Saves ONLY the best weights. Call this only when val_loss improves."""
+        if self.best_model_weights is not None:
+            torch.save(self.best_model_weights, self.save_path / 'best_model.pt')
+
+    def recover(self):
+        print("🚀 Recovering state from disk...")
+        checkpoint = torch.load(self.save_path / 'latest_history.pt')
+
+        # Restore the basic stats
+        for key, value in checkpoint.items():
+            if key not in ['model_state', 'optimizer_state']:
+                setattr(self, key, value)
+
+        # Restore the weights into the live objects
+        self.model.load_state_dict(checkpoint['model_state'])
+        self.optimizer.load_state_dict(checkpoint['optimizer_state'])
+
+        # Check if a best model exists to keep the memory consistent
+        try:
+            self.best_model_weights = torch.load(self.save_path / 'best_model.pt')
+        except FileNotFoundError:
+            self.best_model_weights = None
