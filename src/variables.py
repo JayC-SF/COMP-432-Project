@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 try:
-    from google.colab import userdata
+    from google.colab import userdata, drive
     IN_COLAB = True
 except ImportError:
     IN_COLAB = False
@@ -14,6 +14,8 @@ if IN_COLAB:
     METADATA_ZIP_GID = userdata.get('METADATA_ZIP_GID')
     MEL_SPECTOGRAM_ZIP_GID = userdata.get('MEL_SPECTOGRAM_ZIP_GID')
     MEL_SPECTOGRAM_NPZ_GID = userdata.get('MEL_SPECTOGRAM_NPZ_GID')
+    drive.mount('/content/drive/')
+    RUNS_PATH = Path('/content/drive/MyDrive/')/userdata.get('DRIVE_FOLDER')/'runs'
 
 else:
     load_dotenv()
@@ -21,6 +23,7 @@ else:
     METADATA_ZIP_GID = os.getenv('METADATA_ZIP_GID')
     MEL_SPECTOGRAM_ZIP_GID = os.getenv('MEL_SPECTOGRAM_ZIP_GID')
     MEL_SPECTOGRAM_NPZ_GID = os.getenv('MEL_SPECTOGRAM_NPZ_GID')
+    RUNS_PATH = Path('runs')
 
 DATA_PATH = Path('data')
 
@@ -33,7 +36,5 @@ METADATA_ZIP_FILE_PATH = DATA_PATH/'metadata.zip'
 MEL_SPECTOGRAM_PATH = DATA_PATH/'mel_spectogram'
 MEL_SPECTOGRAM_ZIP_FILE_PATH = DATA_PATH/'mel_spectogram.zip'
 MEL_SPECTOGRAM_NPZ_FILE_PATH = DATA_PATH/'mel_spectogram_audio_length_adjusted.npz'
-
-RUNS_PATH = Path('runs')
 
 SEED = 42

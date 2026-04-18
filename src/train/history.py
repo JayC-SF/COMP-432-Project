@@ -35,11 +35,13 @@ class TrainingHistory:
 
         self.save_path.mkdir(parents=True, exist_ok=True)
         torch.save(save_data, self.save_path / 'latest_history.pt')
+        print(f"Saved checkpoint data under {self.save_path / 'latest_history.pt'}")
 
     def save_best(self):
         """Saves only the best weights. Call this only when val_loss improves."""
         if self.best_model_weights is not None:
             torch.save(self.best_model_weights, self.save_path / 'best_model.pt')
+            print(f"Saved best_model_weights under {self.save_path / 'best_model.pt'}")
 
     def recover(self):
         """Recovers the state saved on disk.
