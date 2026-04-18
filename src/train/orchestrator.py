@@ -5,6 +5,7 @@ import torch
 import copy
 from tqdm.auto import tqdm
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
+import optuna
 
 
 class Orchestrator:
@@ -20,11 +21,12 @@ class Orchestrator:
         save_path,
         scheduler,
         max_epochs,
-        classes
+        classes,
+        trial=None  # for optuna
     ):
 
         self.save_path = save_path
-        self.th = TrainingHistory(self.save_path, model, optimizer, scheduler, recover=self.save_path.exists())
+        self.th = TrainingHistory(self.save_path, model, optimizer, device, scheduler, recover=self.save_path.exists())
         self.criterion = criterion
         self.train_loader = train_loader
         self.val_loader = val_loader
@@ -32,6 +34,8 @@ class Orchestrator:
         self.patience = patience
         self.max_epochs = max_epochs
         self.classes = classes
+        self.trial = trial
+        self.save_to_disk = not (trial is not None)
 
     def train(self):
         print(f"Running with device:{self.device}")
@@ -47,6 +51,10 @@ class Orchestrator:
 
             self.train_step()
             val_loss = self.validate_step()
+
+            # leverage optuna if performing hyperparameter search
+            self.optuna_trial(val_loss)
+
             # Step the scheduler if it exists
             if self.th.scheduler:
                 old_lr = current_lr
@@ -61,7 +69,9 @@ class Orchestrator:
                 if new_lr < old_lr:
                     print(f"📉 Learning rate reduced to {new_lr:.2e}")
 
-            self.th.save_checkpoint()
+            if self.save_to_disk:
+                self.th.save_checkpoint()
+
             continue_training = self.early_stopping_check(val_loss)
 
         print(f"Completed training at epoch {self.th.epoch}")
@@ -86,6 +96,8 @@ class Orchestrator:
             running_loss += loss.item() * inputs.size(0)
             _, preds = torch.max(outputs, 1)
             running_corrects += (preds == labels).sum().item()
+
+        pbar.close()
 
         epoch_loss = running_loss / len(self.train_loader.dataset)
         epoch_acc = running_corrects / len(self.train_loader.dataset)
@@ -119,6 +131,8 @@ class Orchestrator:
                 _, preds = torch.max(outputs, 1)
                 running_corrects += (preds == labels).sum().item()
 
+            pbar.close()
+
         # 5. Calculate final averages for the epoch
         val_loss = running_loss / len(self.val_loader.dataset)
         val_acc = running_corrects / len(self.val_loader.dataset)
@@ -137,7 +151,9 @@ class Orchestrator:
             self.th.early_stopping_counter = 0
 
             self.th.best_model_weights = copy.deepcopy(self.th.model.state_dict())
-            self.th.save_best()
+
+            if self.save_to_disk:
+                self.th.save_best()
         else:
             self.th.early_stopping_counter += 1
             print(f"⚠️ No improvement. Early Stopping Counter: {self.th.early_stopping_counter}/{self.patience}")
@@ -162,7 +178,7 @@ class Orchestrator:
         all_labels = []
         # 2. Turn off the gradient engine (saves memory/time)
         with torch.no_grad():
-            pbar = tqdm(test_loader, desc=f"Epoch {self.th.epoch} [Validate]", unit="batch", leave=False)
+            pbar = tqdm(test_loader, desc=f"Epoch {self.th.epoch} [Test]", unit="batch", leave=False)
             for inputs, labels in pbar:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
@@ -190,3 +206,13 @@ class Orchestrator:
         results['confusion_matrix'] = confusion_matrix(all_labels, all_preds)
 
         return results
+
+    def optuna_trial(self, val_loss):
+        if self.trial is not None:
+            # Tell Optuna the result of this epoch
+            self.trial.report(val_loss, self.th.epoch)
+
+            # Ask Optuna: "Is this run looking like a waste of time?"
+            if self.trial.should_prune():
+                print(f"✂️ Trial pruned at epoch {self.th.epoch}")
+                raise optuna.exceptions.TrialPruned()
