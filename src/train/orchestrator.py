@@ -1,4 +1,3 @@
-import secrets
 import src.variables as v
 from pathlib import Path
 from src.train.history import TrainingHistory
@@ -15,19 +14,20 @@ class TrainOrchestrator:
         train_loader,
         val_loader,
         device,
-        max_epochs,
         patience,
         save_path,
+        scheduler,
+        max_epochs
     ):
 
         self.save_path = save_path
-        self.th = TrainingHistory(self.save_path, model, optimizer, recover=self.save_path.exists())
+        self.th = TrainingHistory(self.save_path, model, optimizer, scheduler, recover=self.save_path.exists())
         self.criterion = criterion
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.device = device
-        self.max_epochs = max_epochs
         self.patience = patience
+        self.max_epochs = max_epochs
 
     def train(self):
         self.th.model = self.th.model.to(self.device)
@@ -35,8 +35,27 @@ class TrainOrchestrator:
         while continue_training:
             self.th.epoch += 1
             print(f"---- Starting Epoch {self.th.epoch} ----")
+
+            # save lrs in history
+            current_lr = self.th.optimizer.param_groups[0]['lr']
+            self.th.lrs.append(current_lr)
+
             self.train_step()
             val_loss = self.validate_step()
+            # Step the scheduler if it exists
+            if self.th.scheduler:
+                old_lr = current_lr
+                # ReduceLROnPlateau needs val_loss, others don't
+                if isinstance(self.th.scheduler, torch.optim.lr_scheduler.ReduceLROnPlateau):
+                    self.th.scheduler.step(val_loss)
+                else:
+                    self.th.scheduler.step()
+
+                new_lr = self.th.optimizer.param_groups[0]['lr']
+
+                if new_lr < old_lr:
+                    print(f"📉 Learning rate reduced to {new_lr:.2e}")
+
             self.th.save_checkpoint()
             continue_training = self.early_stopping_check(val_loss)
 
