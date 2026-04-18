@@ -1,4 +1,5 @@
 import torch
+import os
 
 
 class TrainingHistory:
@@ -32,6 +33,7 @@ class TrainingHistory:
         if self.scheduler is not None:
             save_data['scheduler'] = self.scheduler.state_dict()
 
+        self.save_path.mkdir(parents=True, exist_ok=True)
         torch.save(save_data, self.save_path / 'latest_history.pt')
 
     def save_best(self):
