@@ -4,9 +4,10 @@ from src.train.history import TrainingHistory
 import torch
 import copy
 from tqdm.auto import tqdm
+from sklearn.metrics import classification_report, confusion_matrix, f1_score
 
 
-class TrainOrchestrator:
+class Orchestrator:
     def __init__(
         self,
         model,
@@ -18,7 +19,8 @@ class TrainOrchestrator:
         patience,
         save_path,
         scheduler,
-        max_epochs
+        max_epochs,
+        classes
     ):
 
         self.save_path = save_path
@@ -29,6 +31,7 @@ class TrainOrchestrator:
         self.device = device
         self.patience = patience
         self.max_epochs = max_epochs
+        self.classes = classes
 
     def train(self):
         print(f"Running with device:{self.device}")
@@ -148,3 +151,41 @@ class TrainOrchestrator:
             print("🏁 Max epochs reached.")
             return False
         return True
+
+    def test(self, test_loader):
+        # 1. Set model to evaluation mode
+        self.th.model.eval()
+
+        running_loss = 0
+        running_corrects = 0
+        all_preds = []
+        all_labels = []
+        # 2. Turn off the gradient engine (saves memory/time)
+        with torch.no_grad():
+            pbar = tqdm(test_loader, desc=f"Epoch {self.th.epoch} [Validate]", unit="batch", leave=False)
+            for inputs, labels in pbar:
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
+
+                # 3. Forward pass ONLY
+                outputs = self.th.model(inputs)
+                loss = self.criterion(outputs, labels)
+
+                # 4. Record statistics
+                running_loss += loss.item() * inputs.size(0)
+                _, preds = torch.max(outputs, 1)
+                running_corrects += (preds == labels).sum().item()
+
+                all_preds.extend(preds.cpu().numpy())
+                all_labels.extend(labels.cpu().numpy())
+
+        # 5. Calculate final averages for the epoch
+        results = {}
+        results['test_loss'] = running_loss / len(test_loader.dataset)
+        results['test_acc'] = running_corrects / len(test_loader.dataset)
+
+        print(f"Test Loss: {results['test_loss']:.4f} | Test Acc: {results['test_acc']:.4%}")
+
+        results['classification_report'] = classification_report(all_labels, all_preds, target_names=self.classes)
+
+        return results
