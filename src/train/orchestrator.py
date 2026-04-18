@@ -187,5 +187,6 @@ class Orchestrator:
         print(f"Test Loss: {results['test_loss']:.4f} | Test Acc: {results['test_acc']:.4%}")
 
         results['classification_report'] = classification_report(all_labels, all_preds, target_names=self.classes)
+        results['confusion_matrix'] = confusion_matrix(all_labels, all_preds)
 
         return results
