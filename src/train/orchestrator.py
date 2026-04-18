@@ -91,7 +91,7 @@ class TrainOrchestrator:
         self.th.train_loss.append(epoch_loss)
         self.th.train_acc.append(epoch_acc)
 
-        print(f"Train Loss: {epoch_loss:.4f} | Acc: {epoch_acc:.4f}")
+        print(f"Train Loss: {epoch_loss:.4f} | Train Acc: {epoch_acc:.4%}")
 
     def validate_step(self):
         # 1. Set model to evaluation mode
@@ -102,7 +102,7 @@ class TrainOrchestrator:
 
         # 2. Turn off the gradient engine (saves memory/time)
         with torch.no_grad():
-            pbar = tqdm(self.train_loader, desc=f"Epoch {self.th.epoch} [Validate]", unit="batch", leave=False)
+            pbar = tqdm(self.val_loader, desc=f"Epoch {self.th.epoch} [Validate]", unit="batch", leave=False)
             for inputs, labels in pbar:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
@@ -124,12 +124,12 @@ class TrainOrchestrator:
         self.th.val_loss.append(val_loss)
         self.th.val_acc.append(val_acc)
 
-        print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f}")
+        print(f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4%}")
         return val_loss  # Return this so your early stopping can check it
 
     def early_stopping_check(self, val_loss):
         if val_loss < self.th.best_val_loss:
-            print(f"🌟 New Best Model! Loss decreased from {self.th.best_val_loss:.4f} to {val_loss:.4f}")
+            print(f"🌟 New Best Model! Val Loss decreased from {self.th.best_val_loss:.4f} to {val_loss:.4f}")
             self.th.best_val_loss = val_loss
             self.th.early_stopping_counter = 0
 
