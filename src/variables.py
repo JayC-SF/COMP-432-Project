@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import os
 
 try:
-    import google.colab
+    from google.colab import userdata
     IN_COLAB = True
 except ImportError:
     IN_COLAB = False
