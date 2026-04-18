@@ -43,9 +43,9 @@ class ClassicCNN(nn.Module):
         return x
 
 
-class AudioCRNN(nn.Module):
+class AudioCLSTM(nn.Module):
     def __init__(self, num_classes, dropout=0.3):
-        super(AudioCRNN, self).__init__()
+        super(AudioCLSTM, self).__init__()
 
         # 1. Feature Extraction (CNN)
         # We use a slightly deeper CNN to extract high-level features from the spectrogram

@@ -38,3 +38,5 @@ MEL_SPECTOGRAM_ZIP_FILE_PATH = DATA_PATH/'mel_spectogram.zip'
 MEL_SPECTOGRAM_NPZ_FILE_PATH = DATA_PATH/'mel_spectogram_audio_length_adjusted.npz'
 
 SEED = 42
+
+CLASSES = ['Snoring', 'InfantCry']
