@@ -60,6 +60,7 @@ class TrainingHistory:
 
         # Restore the weights into the live objects
         self.model.load_state_dict(checkpoint['model_state'])
+        self.model.to(device)
         self.optimizer.load_state_dict(checkpoint['optimizer_state'])
         if 'scheduler' in checkpoint and self.scheduler is not None:
             self.scheduler.load_state_dict(checkpoint['scheduler'])

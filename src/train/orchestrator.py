@@ -178,7 +178,7 @@ class Orchestrator:
         all_labels = []
         # 2. Turn off the gradient engine (saves memory/time)
         with torch.no_grad():
-            pbar = tqdm(test_loader, desc=f"Epoch {self.th.epoch} [Test]", unit="batch", leave=False)
+            pbar = tqdm(test_loader, desc=f"[Test]", unit="batch", leave=False)
             for inputs, labels in pbar:
                 inputs = inputs.to(self.device)
                 labels = labels.to(self.device)
