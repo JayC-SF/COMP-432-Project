@@ -2,12 +2,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.ticker import PercentFormatter
 
-def plot_class_inbalance(y):
+
+def plot_class_inbalance(y, dataset_type=""):
     plt.figure(figsize=(8, 5))
 
     sns.countplot(x=y, hue=y, palette='viridis', legend=False)
 
-    plt.title('Class Distribution: No-Cry vs. Cry')
+    plt.title(f"{dataset_type + ' ' if dataset_type is not None else ''}Class Distribution: No-Cry vs. Cry")
     plt.xlabel('Class (0: No-Cry, 1: Cry)')
     plt.ylabel('Number of Samples')
 
@@ -46,4 +47,14 @@ def plot_accuracies_over_epochs(train_acc, val_acc, title):
     plt.xlabel("Epochs")
     plt.legend(["train accuracy", "validation accuracy"])
     plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
+    plt.show()
+
+
+def plot_durations(durations, title):
+    plt.figure(figsize=(10, 6))
+    plt.hist(durations, bins=30, color='skyblue', edgecolor='black')
+    plt.title(title)
+    plt.xlabel("Durations (s)")
+    plt.ylabel("Counts")
+    plt.grid(axis='y', alpha=0.75)
     plt.show()

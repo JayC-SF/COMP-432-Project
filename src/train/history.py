@@ -24,7 +24,7 @@ class TrainingHistory:
     def save_checkpoint(self):
         """Saves everything needed to resume training if the system crashes."""
         # Exclude the heavy model/optimizer objects and the static 'best' weights
-        exclude = ['model', 'optimizer', 'best_model_weights', 'scheduler']
+        exclude = ['model', 'optimizer', 'best_model_weights', 'scheduler', 'save_path']
         save_data = {k: v for k, v in vars(self).items() if k not in exclude}
 
         # Inject the live states
@@ -51,11 +51,12 @@ class TrainingHistory:
             TypeError: If a scheduler was not found on disk but found in the instance
         """
         print("🚀 Recovering state from disk...")
+        print(self.save_path / 'latest_history.pt')
         checkpoint = torch.load(self.save_path / 'latest_history.pt', weights_only=False, map_location=device)
 
         # Restore the basic stats
         for key, value in checkpoint.items():
-            if key not in ['model_state', 'optimizer_state', 'scheduler']:
+            if key not in ['model_state', 'optimizer_state', 'scheduler', 'save_path']:
                 setattr(self, key, value)
 
         # Restore the weights into the live objects

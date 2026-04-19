@@ -171,7 +171,7 @@ class Orchestrator:
         # 1. Set model to evaluation mode
         current_weights = {k: v.cpu().clone() for k, v in self.th.model.state_dict().items()}
         self.th.model.load_state_dict(weights)
-        self.th.model.to(self.device) # Explicitly move to GPU/CPU
+        self.th.model.to(self.device)  # Explicitly move to GPU/CPU
         self.th.model.eval()
         running_loss = 0
         running_corrects = 0

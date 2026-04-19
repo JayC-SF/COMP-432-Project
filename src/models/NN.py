@@ -2,6 +2,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torchvision.models import efficientnet_b0, EfficientNet_B0_Weights
 
+
 class ClassicCNN(nn.Module):
     def __init__(self, num_classes, dropout=0.3):
         super(ClassicCNN, self).__init__()
@@ -102,6 +103,7 @@ class AudioCLSTM(nn.Module):
         # Final Classification
         return self.fc(x)
 
+
 class ResidualBlock(nn.Module):
     def __init__(self, in_channels, out_channels, stride=1):
         super(ResidualBlock, self).__init__()
@@ -121,9 +123,10 @@ class ResidualBlock(nn.Module):
     def forward(self, x):
         out = F.relu(self.bn1(self.conv1(x)))
         out = self.bn2(self.conv2(out))
-        out += self.shortcut(x) # This is the "Skip Connection"
+        out += self.shortcut(x)  # This is the "Skip Connection"
         out = F.relu(out)
         return out
+
 
 class CustomResNet(nn.Module):
     def __init__(self, num_classes=2):
@@ -133,7 +136,7 @@ class CustomResNet(nn.Module):
         # Initial layer
         self.conv1 = nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(16)
-        
+
         # ResNet Layers (1 block)
         self.layer1 = self._make_layer(16, 2, stride=1)
         self.layer2 = self._make_layer(32, 2, stride=2)
