@@ -134,11 +134,11 @@ class CustomResNet(nn.Module):
         self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         
-        # ResNet Layers (blocks)
-        self.layer1 = self._make_layer(64, 2, stride=1)
-        self.layer2 = self._make_layer(128, 2, stride=2)
-        self.layer3 = self._make_layer(256, 2, stride=2)
-        self.layer4 = self._make_layer(512, 2, stride=2)
+        # ResNet Layers (1 block)
+        self.layer1 = self._make_layer(64, 1, stride=1)
+        self.layer2 = self._make_layer(128, 1, stride=2)
+        self.layer3 = self._make_layer(256, 1, stride=2)
+        self.layer4 = self._make_layer(512, 1, stride=2)
 
         # Final layers
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
