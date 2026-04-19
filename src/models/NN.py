@@ -128,21 +128,21 @@ class ResidualBlock(nn.Module):
 class CustomResNet(nn.Module):
     def __init__(self, num_classes=2):
         super(CustomResNet, self).__init__()
-        self.in_channels = 64
+        self.in_channels = 16
 
         # Initial layer
-        self.conv1 = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1, bias=False)
-        self.bn1 = nn.BatchNorm2d(64)
+        self.conv1 = nn.Conv2d(1, 16, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(16)
         
         # ResNet Layers (1 block)
-        self.layer1 = self._make_layer(64, 1, stride=1)
-        self.layer2 = self._make_layer(128, 1, stride=2)
-        self.layer3 = self._make_layer(256, 1, stride=2)
-        self.layer4 = self._make_layer(512, 1, stride=2)
+        self.layer1 = self._make_layer(16, 2, stride=1)
+        self.layer2 = self._make_layer(32, 2, stride=2)
+        self.layer3 = self._make_layer(64, 2, stride=2)
+        self.layer4 = self._make_layer(128, 2, stride=2)
 
         # Final layers
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(512, num_classes)
+        self.fc = nn.Linear(128, num_classes)
 
     def _make_layer(self, out_channels, num_blocks, stride):
         strides = [stride] + [1]*(num_blocks-1)

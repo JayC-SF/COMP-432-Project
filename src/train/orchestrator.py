@@ -66,9 +66,8 @@ class Orchestrator:
 
                 new_lr = self.th.optimizer.param_groups[0]['lr']
 
-                if new_lr < old_lr:
-                    print(f"📉 Learning rate reduced to {new_lr:.2e}")
-
+                if new_lr != old_lr:
+                    print(f"📉 Learning rate {'reduced' if new_lr < old_lr else 'bumped up'} to {new_lr:.2e}")
             if self.save_to_disk:
                 self.th.save_checkpoint()
 
@@ -168,10 +167,12 @@ class Orchestrator:
             return False
         return True
 
-    def test(self, test_loader):
+    def test(self, test_loader, weights):
         # 1. Set model to evaluation mode
+        current_weights = {k: v.cpu().clone() for k, v in self.th.model.state_dict().items()}
+        self.th.model.load_state_dict(weights)
+        self.th.model.to(self.device) # Explicitly move to GPU/CPU
         self.th.model.eval()
-
         running_loss = 0
         running_corrects = 0
         all_preds = []
@@ -204,7 +205,7 @@ class Orchestrator:
 
         results['classification_report'] = classification_report(all_labels, all_preds, target_names=self.classes)
         results['confusion_matrix'] = confusion_matrix(all_labels, all_preds)
-
+        self.th.model.load_state_dict(current_weights)
         return results
 
     def optuna_trial(self, val_loss):

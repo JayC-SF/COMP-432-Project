@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from matplotlib.ticker import PercentFormatter
 
 def plot_class_inbalance(y):
     plt.figure(figsize=(8, 5))
@@ -26,9 +26,24 @@ def plot_normalized_confusion_matrix(conf):
     pass
 
 
-def plot_losses_over_epochs(train_losses, val_losses):
-    pass
+def plot_losses_over_epochs(train_losses, val_losses, title):
+    epochs = range(1, len(train_losses) + 1)
+    plt.plot(epochs, train_losses)
+    plt.plot(epochs, val_losses)
+    plt.title(title)
+    plt.ylabel("Loss")
+    plt.xlabel("Epochs")
+    plt.legend(["train loss", "validation loss"])
+    plt.show()
 
 
-def plot_accuracies_over_epochs(train_acc, val_acc):
-    pass
+def plot_accuracies_over_epochs(train_acc, val_acc, title):
+    epochs = range(1, len(train_acc) + 1)
+    plt.plot(epochs, train_acc)
+    plt.plot(epochs, val_acc)
+    plt.title(title)
+    plt.ylabel("Accuracy (%)")
+    plt.xlabel("Epochs")
+    plt.legend(["train accuracy", "validation accuracy"])
+    plt.gca().yaxis.set_major_formatter(PercentFormatter(xmax=1))
+    plt.show()
