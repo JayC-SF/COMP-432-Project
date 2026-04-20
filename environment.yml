@@ -16,3 +16,4 @@ dependencies:
   - tqdm
   - optuna
   - seaborn
+  - autopep8

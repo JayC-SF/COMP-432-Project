@@ -51,7 +51,6 @@ class TrainingHistory:
             TypeError: If a scheduler was not found on disk but found in the instance
         """
         print("🚀 Recovering state from disk...")
-        print(self.save_path / 'latest_history.pt')
         checkpoint = torch.load(self.save_path / 'latest_history.pt', weights_only=False, map_location=device)
 
         # Restore the basic stats
